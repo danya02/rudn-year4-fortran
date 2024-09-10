@@ -33,7 +33,19 @@
 
     real(real64) :: h ! шаг интегрирования
     integer(int64) :: i
-    ! Здесь должен быть ваш код
+
+    h = (b - a) / n
+    res = 0
+
+    !$omp parallel shared(a, n, h) num_threads(threads_num)
+    !$omp do reduction(+:res)
+    do i = 1, n - 1
+      res = res + (func(a + i * h) * h)
+    end do
+    !$omp end do
+    !$omp end parallel
+
+    res = res + h * 0.5 * (func(a) + func(b))
   end function trapezoidal
 
 end module trapezoidal_rule
